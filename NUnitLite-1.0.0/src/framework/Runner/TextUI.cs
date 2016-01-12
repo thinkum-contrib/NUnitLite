@@ -143,7 +143,14 @@ namespace NUnitLite.Runner
                 try
                 {
                     foreach (string name in commandLineOptions.Parameters)
-                        assemblies.Add(Assembly.Load(name));
+                    {
+                        try {
+                            assemblies.Add(Assembly.LoadFrom(name));
+                        }
+                        catch (FileNotFoundException e) {
+                            assemblies.Add(Assembly.Load(name));
+                        }
+                    }
 
                     if (assemblies.Count == 0)
                         assemblies.Add(callingAssembly);

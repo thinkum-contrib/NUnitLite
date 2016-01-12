@@ -60,6 +60,8 @@ namespace NUnitLite.Runner
 
         private ITestAssemblyRunner runner;
 
+        private FinallyDelegate finallyDelegate;
+
         #region Constructors
 
         /// <summary>
@@ -82,9 +84,20 @@ namespace NUnitLite.Runner
         {
             // Set the default writer - may be overridden by the args specified
             this.writer = writer;
-            this.runner = new NUnitLiteTestAssemblyRunner(new NUnitLiteTestAssemblyBuilder());
+            this.finallyDelegate = new FinallyDelegate();
+            this.runner = new NUnitLiteTestAssemblyRunner(new NUnitLiteTestAssemblyBuilder(), this.finallyDelegate);
             this.listener = listener;
+
+
+	    AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.TopLevelHandler);
         }
+
+	public void TopLevelHandler(object sender, UnhandledExceptionEventArgs e)
+	{
+		// Make sure that the test harness knows this exception was thrown
+		if (this.finallyDelegate != null)
+			this.finallyDelegate.HandleUnhandledExc(e.ExceptionObject as Exception);
+	}
 
         #endregion
 
@@ -142,14 +155,13 @@ namespace NUnitLite.Runner
 
                 try
                 {
-                    foreach (string name in commandLineOptions.Parameters)
-                    {
+                    foreach (string name in commandLineOptions.Parameters) {
                         try {
                             assemblies.Add(Assembly.LoadFrom(name));
-                        }
-                        catch (FileNotFoundException e) {
+                        } 
+			catch (FileNotFoundException e) {
                             assemblies.Add(Assembly.Load(name));
-                        }
+			}
                     }
 
                     if (assemblies.Count == 0)

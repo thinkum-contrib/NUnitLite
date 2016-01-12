@@ -68,6 +68,13 @@ namespace NUnit.Framework.Internal
         protected int assertCount = 0;
 
         /// <summary>
+        /// If the failure state was set out of order
+	/// due to thread unhandled exception. If so,
+	/// it shouldn't be cleared.
+        /// </summary>
+	public bool ThreadCrashFail;
+
+        /// <summary>
         /// List of child results
         /// </summary>
 #if CLR_2_0 || CLR_4_0
@@ -389,9 +396,11 @@ namespace NUnit.Framework.Internal
         /// <param name="stackTrace">Stack trace giving the location of the command</param>
         public void SetResult(ResultState resultState, string message, string stackTrace)
         {
-            this.resultState = resultState;
-            this.message = message;
-            this.stackTrace = stackTrace;
+	    if (!this.ThreadCrashFail) {
+		    this.resultState = resultState;
+		    this.message = message;
+		    this.stackTrace = stackTrace;
+	    }
         }
 
         /// <summary>
@@ -404,15 +413,15 @@ namespace NUnit.Framework.Internal
                 ex = ex.InnerException;
 
             if (ex is System.Threading.ThreadAbortException)
-                SetResult(ResultState.Cancelled, "Test cancelled by user", ex.StackTrace);
+              SetResult(ResultState.Cancelled, "Test cancelled by user", ex.StackTrace);
             else if (ex is AssertionException)
-                SetResult(ResultState.Failure, ex.Message, StackFilter.Filter(ex.StackTrace));
+              SetResult(ResultState.Failure, ex.Message, StackFilter.Filter(ex.StackTrace));
             else if (ex is IgnoreException)
-                SetResult(ResultState.Ignored, ex.Message, StackFilter.Filter(ex.StackTrace));
+              SetResult(ResultState.Ignored, ex.Message, StackFilter.Filter(ex.StackTrace));
             else if (ex is InconclusiveException)
-                SetResult(ResultState.Inconclusive, ex.Message, StackFilter.Filter(ex.StackTrace));
+              SetResult(ResultState.Inconclusive, ex.Message, StackFilter.Filter(ex.StackTrace));
             else if (ex is SuccessException)
-                SetResult(ResultState.Success, ex.Message, StackFilter.Filter(ex.StackTrace));
+              SetResult(ResultState.Success, ex.Message, StackFilter.Filter(ex.StackTrace));
             else
                 SetResult(ResultState.Error,
                     ExceptionHelper.BuildMessage(ex),

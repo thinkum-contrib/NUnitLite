@@ -62,6 +62,8 @@ namespace NUnitLite.Runner
 
         private FinallyDelegate finallyDelegate;
 
+        public bool success;
+
         #region Constructors
 
         /// <summary>
@@ -304,7 +306,9 @@ namespace NUnitLite.Runner
             new ResultReporter(result, writer).ReportResults();
             string resultFile = commandLineOptions.ResultFile;
             string resultFormat = commandLineOptions.ResultFormat;
-                    
+
+            this.success = (result.ResultState == ResultState.Success);
+
             if (resultFile != null || commandLineOptions.ResultFormat != null)
             {
                 if (resultFile == null)

@@ -62,7 +62,7 @@ namespace NUnitLite.Runner
 
         private FinallyDelegate finallyDelegate;
 
-        public bool success;
+        public bool Failure;
 
         #region Constructors
 
@@ -307,7 +307,7 @@ namespace NUnitLite.Runner
             string resultFile = commandLineOptions.ResultFile;
             string resultFormat = commandLineOptions.ResultFormat;
 
-            this.success = (result.ResultState == ResultState.Success);
+            this.Failure = (result.ResultState == ResultState.Failure);
 
             if (resultFile != null || commandLineOptions.ResultFormat != null)
             {

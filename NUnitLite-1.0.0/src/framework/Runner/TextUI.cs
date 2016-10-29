@@ -207,6 +207,9 @@ namespace NUnitLite.Runner
                                 filter = new AndFilter(filter, excludeFilter);
                         }
 
+#if MONO
+                        filter = Xamarin.BabysitterSupport.AddBabysitterFilter(filter);
+#endif
                         RunTests(filter);
                     }
                 }
@@ -360,6 +363,10 @@ namespace NUnitLite.Runner
         /// <param name="test">The test</param>
         public void TestStarted(ITest test)
         {
+#if MONO
+            if (!test.IsSuite)
+                Xamarin.BabysitterSupport.RecordEnterTest(test.FullName);
+#endif
             if (commandLineOptions.LabelTestsInOutput)
                 writer.WriteLine("***** {0}", test.Name);
         }
@@ -370,6 +377,13 @@ namespace NUnitLite.Runner
         /// <param name="result">The result of the test</param>
         public void TestFinished(ITestResult result)
         {
+#if MONO
+            if (!result.Test.IsSuite) {
+                Xamarin.BabysitterSupport.RecordLeaveTest (result.Test.FullName);
+                if (result.ResultState.Status == TestStatus.Failed)
+                    Xamarin.BabysitterSupport.RecordFailedTest (result.Test.FullName);
+            }
+#endif
         }
 
         /// <summary>

@@ -366,9 +366,15 @@ namespace NUnitLite.Runner
 #if MONO
             if (!test.IsSuite)
                 Xamarin.BabysitterSupport.RecordEnterTest(test.FullName);
-#endif
+
+            if (commandLineOptions.LabelTestsInOutput)
+                writer.WriteLine("***** {0}", test.FullName);
+            else
+                writer.Write(".");
+#else
             if (commandLineOptions.LabelTestsInOutput)
                 writer.WriteLine("***** {0}", test.Name);
+#endif
         }
 
         /// <summary>

@@ -64,6 +64,21 @@ namespace NUnit.Framework.Internal
 
 		Dictionary<Guid, TestResult> lookupTable;
 
+		// Why is CallContext used? Consider the following scenario:
+		//
+		// * say Test_A runs in Thread_1
+		// * Test_A spawns another Thread_2
+		// * Thread_1 finishes with Test_A, and moves on to Test_B
+		// * Thread_2 isn't done yet really, crashes and causes an unhandled exception
+		// * we need a way to map this unhandled exception to Test_A, although Test_B is the currently running test
+		//
+		// => what we need is some sort of "thread local" that gets inherited: when
+		// Thread_1 creates Thread_2, it needs to have the same "thread local" values.
+		// that is achieved with `CallContext`.
+		//
+		// Unfortunately, remoting isn't available on every platform, thus we can't
+		// support this scenario. Luckily, this scenario is very rare.
+
 #if NO_REMOTING
 		static Container container;
 #else

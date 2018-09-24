@@ -56,6 +56,13 @@ namespace NUnit.Framework.Internal
         /// </summary>
         private string stackTrace;
 
+#if MONO
+        /// <summary>
+        /// The exceptionType at the point of failure
+        /// </summary>
+        private string exceptionType;
+#endif
+
         /// <summary>
         /// Message giving the reason for failure, error or skipping the test
         /// </summary>
@@ -162,6 +169,17 @@ namespace NUnit.Framework.Internal
         {
             get { return stackTrace; }
         }
+
+#if MONO
+        /// <summary>
+        /// Gets any exception associated with an
+        /// error or failure.
+        /// </summary>
+        public virtual string ExceptionType
+        {
+            get { return exceptionType; }
+        }
+#endif
 
         /// <summary>
         /// Gets or sets the count of asserts executed
@@ -412,6 +430,10 @@ namespace NUnit.Framework.Internal
         {
             if (ex is NUnitException)
                 ex = ex.InnerException;
+
+#if MONO
+            exceptionType = ex?.GetType().ToString();
+#endif
 
             if (ex is System.Threading.ThreadAbortException)
               SetResult(ResultState.Cancelled, "Test cancelled by user", ex.StackTrace);
